@@ -1,3 +1,5 @@
+![Example](example.png)
+
 # textscan
 
 `textscan` uses JEV noul queries to highlight English-prose sentences in a
@@ -6,6 +8,8 @@
 ```sh
 JEV_API_KEY=... go run . notes.txt "Does this discuss credential theft?"
 ```
+
+(or compile it to a binary)
 
 The tool queries every blank-line-delimited paragraph first. A paragraph whose
 probability is at least `--risk-cutoff` (default `0.95`) is then split into
