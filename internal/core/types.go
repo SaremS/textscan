@@ -1,30 +1,103 @@
 package core
 
-type DocumentIdentifier string
+type Identifier string
 type Text string
+type QuestionSet []string
+type ProgrammingLanguage string
 
-type Document struct {
-	Identifier DocumentIdentifier
-	Text       Text
-	Scoring    *ProbabilityScoring
+const (
+	Go         ProgrammingLanguage = "go"
+	JavaScript ProgrammingLanguage = "javascript"
+	Python     ProgrammingLanguage = "python"
+)
+
+type NewLineOffset struct {
+	LineStartPos int
+	LineEndPos   int
+	LineNumber   int
 }
 
-func NewDocument(identifier DocumentIdentifier, text Text) *Document {
-	return &Document{
-		Identifier: identifier,
-		Text:       text,
-		Scoring:    newProbabilityScoring(len(text)),
+type ProbsRange struct {
+	Identifier      Identifier
+	Start           int
+	End             int
+	Probability     float64
+	StartLineOffset NewLineOffset
+	EndLineOffset   NewLineOffset
+	TextSnippet     Text
+	Question        string
+}
+
+type TextItem struct {
+	Identifier     Identifier
+	Text           Text
+	Questions      QuestionSet
+	NewLineOffsets []NewLineOffset
+	Scoring        TextScoring
+	ProbsRanges    []ProbsRange
+}
+
+func NewTextItem(identifier Identifier, text Text, questions QuestionSet) (*TextItem, error) {
+	scoring, err := newTextScoring(len(questions), []byte(text))
+	if err != nil {
+		return nil, err
 	}
+
+	offsets := getNewLineOffsets(text)
+	var probsRanges []ProbsRange
+
+	return &TextItem{
+		Identifier:     identifier,
+		Text:           text,
+		Questions:      questions,
+		NewLineOffsets: offsets,
+		Scoring:        *scoring,
+		ProbsRanges:    probsRanges,
+	}, nil
+}
+
+func getNewLineOffsets(text Text) []NewLineOffset {
+	result := make([]NewLineOffset, len(text))
+	currentLine := 1
+	currentNewLineOffset := 0
+
+	for pos := range len(text) {
+		offset := NewLineOffset{
+			LineStartPos: currentNewLineOffset,
+			LineEndPos:   -1,
+			LineNumber:   currentLine,
+		}
+		result[pos] = offset
+		if text[pos] == '\n' {
+			currentNewLineOffset = pos
+			currentLine = currentLine + 1
+		}
+	}
+
+	currentNewLineOffset = len(text)
+
+	for pos := len(text) - 1; pos >= 0; pos-- {
+		if text[pos] == '\n' {
+			currentNewLineOffset = pos
+		}
+		result[pos].LineEndPos = currentNewLineOffset
+	}
+
+	return result
 }
 
 type TextReader interface {
-	ReadText() ([]Document, error)
+	ParseText(QuestionSet) ([]TextItem, error)
 }
 
-type ScannerBackend interface {
-	ScanText(documents []Document) error
+type Backend interface {
+	ScanText(textItems []TextItem) <-chan ProbsRange
 }
 
-type OutputFrontend interface {
-	DisplayOutput(documents []Document) error
+type Frontend interface {
+	DisplayOutput(textItems []TextItem) error
+}
+
+type AsyncFrontend interface {
+	DisplayOutput(probsRangeChan <-chan ProbsRange)
 }

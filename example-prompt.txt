@@ -1,0 +1,86 @@
+go run ./cmd examples -q Is this code vulnerable to prototype pollution? -q Is this code vulnerable to SQL injection? -q Is this related to Germany? --probability-cutoff 0.7 --max-depth=3
+\n\n
+examples/example.js, L6-L22:
+
+function combine(a, b) {
+  for (const k in b) {
+    const v = b[k];
+
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      if (!a[k] || typeof a[k] !== "object") {
+        a[k] = {};
+      }
+
+      combine(a[k], v);
+    } else {
+      a[k] = v;
+    }
+  }
+
+  return a;
+}
+
+p('Is this code vulnerable to prototype pollution?')=0.760000
+
+
+examples/example.txt, L1-L1:
+
+Project Atlas began on a rainy Monday morning in Berlin, when Alice Johnson arrived at the office carrying a blue notebook, a paper cup of café au lait, and a list of questions about how people search for information.
+
+p('Is this related to Germany?')=0.873600
+
+
+examples/example.txt, L19-L19:
+
+ One paragraph referred to München, another used Munchen, and a third mentioned São Paulo.
+
+p('Is this related to Germany?')=0.747000
+
+
+examples/example.py, L76-L81:
+
+sql = (
+        "SELECT id, name, description "
+        "FROM products "
+        f"WHERE name LIKE '%{query}%' "
+        "ORDER BY name"
+    )
+
+p('Is this code vulnerable to SQL injection?')=0.831744
+
+
+examples/example.txt, L11-L11:
+
+ Then he inserted identifiers such as ORD-9384, ISBN 978-3-16-148410-0, and the phone number +49 711 1234567.
+
+p('Is this related to Germany?')=0.734700
+
+
+examples/example.txt, L5-L5:
+
+ One note described a customer named Diana Chen, who managed product launches for a robotics company in Stuttgart.
+
+p('Is this related to Germany?')=0.893000
+
+
+examples/example.txt, L5-L5:
+
+ Would a search for “Muller” find “Müller”?
+
+p('Is this related to Germany?')=0.799000
+
+
+examples/example.txt, L5-L5:
+
+ A third referred to Frank Müller, who enjoyed hiking in the Black Forest.
+
+p('Is this related to Germany?')=0.846000
+
+
+examples/example.txt, L5-L5:
+
+ Would “Straße” and “Strasse” be treated as related terms, or as entirely different strings?
+
+p('Is this related to Germany?')=0.874200
+
+
