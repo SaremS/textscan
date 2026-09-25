@@ -1,5 +1,7 @@
 # textscan
 
+![screenshot](./screenshot.png)
+
 `textscan` scans text and source files with JEV and returns matching snippets with per-question probabilities.
 
 ## Requirements
